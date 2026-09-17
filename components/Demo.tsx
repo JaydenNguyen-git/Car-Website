@@ -197,7 +197,7 @@ export default function Demo() {
       </div>
 
       {/* Customer phone */}
-      <div className={styles.phoneCol}>
+      <div className={`${styles.phoneCol} ${styles.customerCol}`}>
         <div className={styles.phoneLabel}>Customer&apos;s phone</div>
         <div className={styles.customerFrame}>
           <div className={styles.customerScreen}>
@@ -509,7 +509,7 @@ export default function Demo() {
       </div>
 
       {/* Shop phone */}
-      <div className={styles.phoneCol}>
+      <div className={`${styles.phoneCol} ${styles.shopCol}`}>
         <div className={styles.phoneLabel}>Shop&apos;s phone</div>
         <div className={styles.detailerFrame} ref={shopRef}>
           {s.step !== 6 && (

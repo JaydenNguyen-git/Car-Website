@@ -60,6 +60,21 @@
   align-items: center;
 }
 
+.customerCol {
+  flex: 0 0 360px;
+}
+.shopCol {
+  flex: 0 0 320px;
+}
+
+@media (max-width: 720px) {
+  .customerCol,
+  .shopCol {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+
 .phoneLabel {
   font-size: 13px;
   letter-spacing: 1.5px;
@@ -68,13 +83,19 @@
 }
 
 .customerFrame {
-  width: min(360px, 100%);
-  aspect-ratio: 360 / 780;
-  min-height: 600px;
+  width: 360px;
+  height: 780px;
   box-sizing: border-box;
   border-radius: 48px;
   background: var(--bezel);
   padding: 12px;
+}
+
+@media (max-width: 720px) {
+  .customerFrame {
+    width: 100%;
+    max-width: 360px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -82,7 +103,6 @@
     padding: 0;
     border-radius: 24px;
     background: transparent;
-    min-height: 520px;
   }
 }
 
@@ -131,7 +151,7 @@
 }
 
 .detailerFrame {
-  width: min(320px, 100%);
+  width: 320px;
   box-sizing: border-box;
   border-radius: 22px;
   background: var(--bezel);
@@ -139,6 +159,13 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+@media (max-width: 720px) {
+  .detailerFrame {
+    width: 100%;
+    max-width: 320px;
+  }
 }
 
 .bookingCard {
