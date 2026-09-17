@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F3F1EC; color: #16181B; font-family: "IBM Plex Sans", "Helvetica Neue", Helvetica, sans-serif; }
+    a { color: #0B5E54; } a:hover { color: #083F38; }
+    button { font-family: inherit; cursor: pointer; }
+    button:disabled { cursor: not-allowed; }
+    h1, h2, h3 { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; }
+  </style>
+</helmet>
+<div style="width: 100%; min-height: 4300px; box-sizing: border-box; background: #F3F1EC; display: flex; flex-direction: column; align-items: center;">
+
+  <!-- NAV -->
+  <div style="width: 100%; max-width: 1280px; box-sizing: border-box; padding: 24px 40px; display: flex; justify-content: space-between; align-items: center; gap: 24px;">
+    <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.5px;">[APP NAME]</div>
+    <div style="display: flex; align-items: center; gap: 32px; font-size: 16px;">
+      <a href="#how" style="color: #16181B; text-decoration: none;">How it works</a>
+      <a href="#pricing" style="color: #16181B; text-decoration: none;">Pricing</a>
+      <a href="#faq" style="color: #16181B; text-decoration: none;">FAQ</a>
+      <a href="#join" style="display: inline-block; padding: 12px 20px; border-radius: 10px; background: {{accent}}; color: #FFFFFF; text-decoration: none; font-weight: 600;">Get early access</a>
+    </div>
+  </div>
+
+  <!-- HERO COPY -->
+  <div style="width: 100%; max-width: 1280px; box-sizing: border-box; padding: 56px 40px 32px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="font-size: 15px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: {{accent}};">For mobile detailers and coating installers</div>
+    <h1 style="margin: 0; font-size: 84px; line-height: 0.95; font-weight: 700; max-width: 980px; text-transform: uppercase;">Customers get a price, book a time, and pay a deposit. While you're working.</h1>
+    <p style="margin: 0; font-size: 21px; line-height: 1.5; color: #4A4F55; max-width: 720px;">No more "DM for a quote" and waiting a day to reply. Put one link in your Instagram bio or on your site, and customers go from curious to booked in about two minutes.</p>
+    <div style="display: flex; gap: 16px; align-items: center; padding-top: 8px;">
+      <a href="#join" style="display: inline-block; padding: 16px 26px; border-radius: 12px; background: {{accent}}; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 17px;">Get early access</a>
+      <a href="#demo" style="display: inline-block; padding: 16px 26px; border-radius: 12px; border: 2px solid #16181B; color: #16181B; text-decoration: none; font-weight: 600; font-size: 17px;">Try the demo below</a>
+    </div>
+  </div>
+
+  <!-- DEMO STAGE -->
+  <div id="demo" style="width: 100%; max-width: 1280px; box-sizing: border-box; padding: 40px 40px 80px;">
+    <div style="background: #16181B; color: #F3F1EC; border-radius: 28px; padding: 48px; display: flex; gap: 48px; align-items: flex-start; flex-wrap: wrap; justify-content: center;">
+
+      <!-- Step list -->
+      <div style="flex: 1 1 300px; max-width: 340px; display: flex; flex-direction: column; gap: 8px;">
+        <h2 style="margin: 0 0 8px; font-size: 40px; line-height: 1; text-transform: uppercase;">Try it like a customer</h2>
+        <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.5; color: #C9C6BF;">Tap through the phone. The right side shows what lands on the detailer's phone.</p>
+        <sc-for list="{{ stepList }}" as="it" hint-placeholder-count="6">
+          <div style="display: flex; gap: 14px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: {{ it.rowBg }};">
+            <div style="flex: 0 0 30px; height: 30px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; background: {{ it.dotBg }}; color: {{ it.dotColor }};">{{ it.n }}</div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-weight: 600; font-size: 16px;">{{ it.title }}</div>
+              <div style="font-size: 14px; line-height: 1.45; color: #C9C6BF;">{{ it.body }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- Customer phone -->
+      <div style="flex: 0 0 360px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+        <div style="font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: #C9C6BF;">Customer's phone</div>
+        <div style="width: 360px; height: 740px; box-sizing: border-box; border-radius: 48px; background: #2A2D31; padding: 12px;">
+          <div style="width: 100%; height: 100%; box-sizing: border-box; border-radius: 38px; background: #FFFFFF; color: #16181B; padding: 28px 20px 20px; display: flex; flex-direction: column; gap: 14px; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="font-weight: 600; font-size: 15px;">[Your Detailing Co.]</div>
+              <div style="font-size: 13px; color: #4A4F55;">{{ stepLabel }}</div>
+            </div>
+            <div style="height: 6px; border-radius: 3px; background: #E4E1DB;">
+              <div style="height: 6px; border-radius: 3px; width: {{ progress }}; background: {{accent}};"></div>
+            </div>
+            <h3 style="margin: 4px 0 0; font-size: 30px; line-height: 1.05; text-transform: uppercase;">{{ stepTitle }}</h3>
+
+            <!-- step 0: vehicle -->
+            <sc-if value="{{ s0 }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <sc-for list="{{ vehicles }}" as="v" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ v.pick }}" style="text-align: left; padding: 14px 16px; min-height: 56px; border-radius: 14px; background: {{ v.bg }}; border: 2px solid {{ v.border }}; color: #16181B; font-size: 16px; font-weight: 600;">{{ v.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <!-- step 1: package -->
+            <sc-if value="{{ s1 }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <sc-for list="{{ packages }}" as="p" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ p.pick }}" style="text-align: left; padding: 12px 16px; min-height: 64px; border-radius: 14px; background: {{ p.bg }}; border: 2px solid {{ p.border }}; color: #16181B; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                    <span style="display: flex; flex-direction: column; gap: 2px;">
+                      <span style="font-size: 16px; font-weight: 600;">{{ p.label }}</span>
+                      <span style="font-size: 13px; color: #4A4F55;">{{ p.time }}</span>
+                    </span>
+                    <span style="font-size: 14px; font-weight: 600; color: #16181B;">{{ p.from }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <!-- step 2: condition + photos -->
+            <sc-if value="{{ s2 }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <sc-for list="{{ conditions }}" as="c" hint-placeholder-count="3">
+                  <button type="button" onClick="{{ c.pick }}" style="text-align: left; padding: 10px 16px; min-height: 58px; border-radius: 14px; background: {{ c.bg }}; border: 2px solid {{ c.border }}; color: #16181B; display: flex; flex-direction: column; gap: 2px;">
+                    <span style="font-size: 16px; font-weight: 600;">{{ c.label }}</span>
+                    <span style="font-size: 13px; color: #4A4F55;">{{ c.sub }}</span>
+                  </button>
+                </sc-for>
+                <div style="font-size: 14px; font-weight: 600; padding-top: 6px;">Add photos (helps lock your price)</div>
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+                  <sc-for list="{{ photoTiles }}" as="ph" hint-placeholder-count="3">
+                    <button type="button" onClick="{{ addPhoto }}" aria-label="Add photo" style="height: 74px; border-radius: 12px; border: 2px dashed {{ ph.border }}; background: {{ ph.bg }}; color: {{ ph.color }}; font-size: 13px; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+                      <span>{{ ph.label }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- step 3: price + time -->
+            <sc-if value="{{ s3 }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="border-radius: 16px; background: #F3F1EC; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;">
+                  <div style="font-size: 13px; color: #4A4F55;">{{ summaryLine }}</div>
+                  <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 44px; font-weight: 700; line-height: 1;">{{ priceRange }}</div>
+                  <div style="font-size: 13px; line-height: 1.4; color: #4A4F55;">{{ priceNote }}</div>
+                </div>
+                <div style="font-size: 14px; font-weight: 600; padding-top: 2px;">Pick a time</div>
+                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+                  <sc-for list="{{ slots }}" as="t" hint-placeholder-count="4">
+                    <button type="button" onClick="{{ t.pick }}" style="min-height: 50px; border-radius: 12px; background: {{ t.bg }}; border: 2px solid {{ t.border }}; color: #16181B; font-size: 14px; font-weight: 600;">{{ t.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- step 4: deposit -->
+            <sc-if value="{{ s4 }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="border-radius: 16px; border: 1px solid #D9D6D0; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+                  <div style="display: flex; justify-content: space-between; gap: 8px;"><span style="color: #4A4F55;">Vehicle</span><span style="font-weight: 600;">{{ vehicleLabel }}</span></div>
+                  <div style="display: flex; justify-content: space-between; gap: 8px;"><span style="color: #4A4F55;">Package</span><span style="font-weight: 600;">{{ packageLabel }}</span></div>
+                  <div style="display: flex; justify-content: space-between; gap: 8px;"><span style="color: #4A4F55;">Time</span><span style="font-weight: 600;">{{ slotLabel }}</span></div>
+                  <div style="display: flex; justify-content: space-between; gap: 8px;"><span style="color: #4A4F55;">Estimate</span><span style="font-weight: 600;">{{ priceRange }}</span></div>
+                  <div style="height: 1px; background: #E4E1DB;"></div>
+                  <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 16px;"><span style="font-weight: 600;">Due now (deposit)</span><span style="font-weight: 700;">{{ deposit }}</span></div>
+                </div>
+                <div style="font-size: 13px; line-height: 1.45; color: #4A4F55;">Your deposit comes off the final bill. If the car's condition differs from your photos, you'll approve any price change before work starts. Free cancellation up to [24 hrs] before.</div>
+              </div>
+            </sc-if>
+
+            <!-- step 5: booked -->
+            <sc-if value="{{ s5 }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start;">
+                <div style="width: 56px; height: 56px; border-radius: 28px; background: {{accent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+                </div>
+                <div style="font-size: 16px; line-height: 1.5;">{{ bookedLine }}</div>
+                <div style="font-size: 14px; line-height: 1.5; color: #4A4F55;">{{ bookedNote }}</div>
+                <button type="button" onClick="{{ restart }}" style="margin-top: 6px; padding: 12px 16px; min-height: 44px; border-radius: 12px; border: 2px solid #16181B; background: #FFFFFF; color: #16181B; font-size: 14px; font-weight: 600;">Run the demo again</button>
+              </div>
+            </sc-if>
+
+            <div style="flex-grow: 1;"></div>
+            <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; gap: 8px;">
+                <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{ back }}" style="flex: 0 0 88px; min-height: 52px; border-radius: 14px; border: 2px solid #D9D6D0; background: #FFFFFF; color: #16181B; font-size: 15px; font-weight: 600;">Back</button>
+                </sc-if>
+                <button type="button" disabled="{{ cantNext }}" onClick="{{ next }}" style="flex-grow: 1; min-height: 52px; border-radius: 14px; border: none; background: {{accent}}; color: #FFFFFF; font-size: 16px; font-weight: 600; opacity: {{ nextOpacity }};">{{ nextLabel }}</button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailer phone -->
+      <div style="flex: 0 0 320px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+        <div style="font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: #C9C6BF;">Detailer's phone</div>
+        <div style="width: 320px; box-sizing: border-box; border-radius: 22px; background: #2A2D31; padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+          <sc-if value="{{ waiting }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 10px; padding: 24px 8px; align-items: center; text-align: center;">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#C9C6BF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg>
+              <div style="font-size: 15px; font-weight: 600;">You're on a job</div>
+              <div style="font-size: 14px; line-height: 1.5; color: #C9C6BF;">{{ waitingNote }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ s5 }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 10px; height: 10px; border-radius: 5px; background: #4FD1B5;"></div>
+                <div style="font-size: 15px; font-weight: 600;">{{ detailerHeadline }}</div>
+              </div>
+              <div style="border-radius: 14px; background: #F3F1EC; color: #16181B; padding: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+                <div style="font-weight: 600; font-size: 16px;">[Customer name] · {{ slotLabel }}</div>
+                <div>{{ vehicleLabel }} · {{ packageLabel }}</div>
+                <div>Condition: {{ conditionLabel }} · {{ photoCountLabel }}</div>
+                <div>Estimate: {{ priceRange }}</div>
+                <div style="font-weight: 600; color: {{accent}};">{{ deposit }} deposit paid</div>
+              </div>
+              <sc-if value="{{ needsApprove }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <div style="font-size: 13px; line-height: 1.45; color: #C9C6BF;">Big job. Check the photos and confirm the final price:</div>
+                  <div style="display: flex; gap: 8px;">
+                    <button type="button" style="flex-grow: 1; min-height: 46px; border-radius: 12px; border: none; background: #4FD1B5; color: #16181B; font-size: 14px; font-weight: 600;">Approve {{ priceHigh }}</button>
+                    <button type="button" style="flex-grow: 1; min-height: 46px; border-radius: 12px; border: 2px solid #C9C6BF; background: transparent; color: #F3F1EC; font-size: 14px; font-weight: 600;">Adjust price</button>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ instant }}" hint-placeholder-val="{{ true }}">
+                <div style="font-size: 13px; line-height: 1.45; color: #C9C6BF;">Standard job, booked instantly. It's on your calendar.</div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <div style="font-size: 13px; line-height: 1.5; color: #C9C6BF; max-width: 300px; text-align: center;">Demo pricing is an example. Detailers set their own packages and prices.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div id="how" style="width: 100%; max-width: 1280px; box-sizing: border-box; padding: 40px 40px 80px; display: flex; flex-direction: column; gap: 40px;">
+    <h2 style="margin: 0; font-size: 56px; line-height: 1; text-transform: uppercase; max-width: 800px;">Why customers actually commit</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;">
+      <div style="background: #FFFFFF; border: 1px solid #D9D6D0; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: {{accent}};">01</div>
+        <h3 style="margin: 0; font-size: 30px; text-transform: uppercase;">A price right away</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #4A4F55;">Customers see a real range for their vehicle and condition instead of waiting on a DM. People book the detailer who answers first.</p>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #D9D6D0; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: {{accent}};">02</div>
+        <h3 style="margin: 0; font-size: 30px; text-transform: uppercase;">Booking on the same screen</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #4A4F55;">Open times show next to the price, so there's no second conversation about scheduling.</p>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #D9D6D0; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: {{accent}};">03</div>
+        <h3 style="margin: 0; font-size: 30px; text-transform: uppercase;">A deposit locks it in</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #4A4F55;">People who pay something show up. You set the deposit amount and cancellation policy.</p>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #D9D6D0; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: {{accent}};">04</div>
+        <h3 style="margin: 0; font-size: 30px; text-transform: uppercase;">You approve big jobs</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #4A4F55;">Paint correction, coatings, and heavy interiors come to you with photos. Confirm or adjust the price with one tap.</p>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #D9D6D0; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: {{accent}};">05</div>
+        <h3 style="margin: 0; font-size: 30px; text-transform: uppercase;">Follow-ups on autopilot</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #4A4F55;">Got a price but didn't book? They get a reminder with their quote and a booking link.</p>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #D9D6D0; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: {{accent}};">06</div>
+        <h3 style="margin: 0; font-size: 30px; text-transform: uppercase;">No website needed</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #4A4F55;">Use your booking link in your Instagram bio, Google profile, or texts. Have a site? Embed it there too.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div id="pricing" style="width: 100%; max-width: 1280px; box-sizing: border-box; padding: 40px 40px 80px; display: flex; flex-direction: column; gap: 32px;">
+    <h2 style="margin: 0; font-size: 56px; line-height: 1; text-transform: uppercase;">Simple pricing</h2>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; max-width: 920px;">
+      <div style="background: #FFFFFF; border: 1px solid #D9D6D0; border-radius: 20px; padding: 32px; display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="margin: 0; font-size: 30px; text-transform: uppercase;">Starter</h3>
+        <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 56px; font-weight: 700; line-height: 1;">[$XX]<span style="font-size: 22px; color: #4A4F55;"> /mo</span></div>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #4A4F55;">Quote and booking page, photo uploads, time slots, deposits, and instant lead alerts.</p>
+      </div>
+      <div style="background: #16181B; color: #F3F1EC; border-radius: 20px; padding: 32px; display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="margin: 0; font-size: 30px; text-transform: uppercase;">Pro</h3>
+        <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 56px; font-weight: 700; line-height: 1;">[$XX]<span style="font-size: 22px; color: #C9C6BF;"> /mo</span></div>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C6BF;">Everything in Starter, plus one-tap price approval for big jobs and automatic follow-up texts.</p>
+      </div>
+    </div>
+    <p style="margin: 0; font-size: 16px; color: #4A4F55;">Founding detailers: locked-in price and free setup for the first [10] shops.</p>
+  </div>
+
+  <!-- FAQ -->
+  <div id="faq" style="width: 100%; max-width: 1280px; box-sizing: border-box; padding: 40px 40px 80px; display: flex; flex-direction: column; gap: 28px;">
+    <h2 style="margin: 0; font-size: 56px; line-height: 1; text-transform: uppercase;">Questions</h2>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 48px; max-width: 1080px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h3 style="margin: 0; font-size: 26px; text-transform: uppercase;">What if the car is worse than the photos?</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #4A4F55;">Customers agree up front that the price can change if the condition differs. They approve any change before you start.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h3 style="margin: 0; font-size: 26px; text-transform: uppercase;">Do my customers need an app?</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #4A4F55;">No. It opens in their phone's browser from your link.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h3 style="margin: 0; font-size: 26px; text-transform: uppercase;">How long does setup take?</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #4A4F55;">Pick your packages, enter prices by vehicle size, set your hours. Founding shops get it set up for them.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h3 style="margin: 0; font-size: 26px; text-transform: uppercase;">Where do deposits go?</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #4A4F55;">Straight to your own payment account. [Payment provider details]</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div id="join" style="width: 100%; max-width: 1280px; box-sizing: border-box; padding: 20px 40px 100px;">
+    <div style="background: {{accent}}; color: #FFFFFF; border-radius: 28px; padding: 56px; display: flex; flex-direction: column; gap: 20px;">
+      <h2 style="margin: 0; font-size: 60px; line-height: 1; text-transform: uppercase; max-width: 820px;">Stop losing jobs to slow replies</h2>
+      <p style="margin: 0; font-size: 19px; line-height: 1.5; max-width: 640px;">Join the founding detailers. Free setup and a locked-in price.</p>
+      <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="email" style="font-size: 14px; font-weight: 600;">Email</label>
+          <input id="email" type="email" placeholder="you@yourdetailing.com" style="width: 320px; height: 52px; box-sizing: border-box; padding: 0 16px; border-radius: 12px; border: none; font-size: 16px; font-family: inherit;">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="ig" style="font-size: 14px; font-weight: 600;">Instagram handle</label>
+          <input id="ig" type="text" placeholder="@yourshop" style="width: 240px; height: 52px; box-sizing: border-box; padding: 0 16px; border-radius: 12px; border: none; font-size: 16px; font-family: inherit;">
+        </div>
+        <button type="button" style="height: 52px; padding: 0 26px; border-radius: 12px; border: none; background: #16181B; color: #FFFFFF; font-size: 16px; font-weight: 600;">Get early access</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#0B5E54","options":["#0B5E54","#1D4ED8","#B42318","#16181B"]},"$preview":{"width":1440,"height":4300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: 0, vehicle: null, pkg: null, cond: null, slot: null, photos: 0 };
+  }
+  renderVals() {
+    const accent = this.props.accent ?? '#0B5E54';
+    const s = this.state;
+    const V = [
+      { id: 'sedan', label: 'Sedan / Coupe', m: 1 },
+      { id: 'suv', label: 'SUV / Crossover', m: 1.2 },
+      { id: 'truck', label: 'Truck', m: 1.3 },
+      { id: 'xl', label: 'Van / 3-row SUV', m: 1.45 }
+    ];
+    const P = [
+      { id: 'wash', label: 'Maintenance wash', base: 60, time: 'About 1–2 hours' },
+      { id: 'interior', label: 'Full interior', base: 150, time: 'About 3 hours' },
+      { id: 'full', label: 'Full detail', base: 230, time: 'About 4–5 hours' },
+      { id: 'coating', label: 'Ceramic coating', base: 650, time: '1–2 days' }
+    ];
+    const C = [
+      { id: 'light', label: 'Light', sub: 'Regular upkeep, no stains', m: 1 },
+      { id: 'moderate', label: 'Moderate', sub: 'Some stains, crumbs, a little pet hair', m: 1.15 },
+      { id: 'heavy', label: 'Heavy', sub: 'Lots of pet hair, spills, or odors', m: 1.35 }
+    ];
+    const T = ['Thu 9:00 AM', 'Thu 2:00 PM', 'Fri 10:00 AM', 'Sat 8:00 AM'];
+    const on = (x) => ({ bg: x ? '#E7F1EE' : '#FFFFFF', border: x ? accent : '#D9D6D0' });
+    const money = (n) => '$' + n.toLocaleString('en-US');
+
+    const v = V.find((x) => x.id === s.vehicle);
+    const p = P.find((x) => x.id === s.pkg);
+    const c = C.find((x) => x.id === s.cond);
+    let low = 0, high = 0;
+    if (v && p && c) {
+      low = Math.round((p.base * v.m * c.m) / 10) * 10;
+      high = Math.round((low * 1.2) / 10) * 10;
+    }
+    const needsApprove = s.pkg === 'coating' || s.cond === 'heavy';
+    const deposit = s.pkg === 'coating' ? 100 : 50;
+
+    const titles = ['What are we detailing?', 'Pick a package', 'How does it look right now?', 'Your price and a time', 'Lock in your spot', "You're booked"];
+    const canNext = [!!s.vehicle, !!s.pkg, !!s.cond, !!s.slot, true, true][s.step];
+    const nextLabels = ['Continue', 'Continue', 'See my price', 'Continue to deposit', 'Pay ' + money(deposit) + ' deposit (demo)', ''];
+
+    const steps = [
+      { title: 'Taps your link', body: 'From Instagram, Google, or your site. Picks their vehicle.' },
+      { title: 'Chooses a package', body: 'Your packages, your prices, adjusted by vehicle size.' },
+      { title: 'Describes condition', body: 'Quick condition pick plus photos, so the price holds up.' },
+      { title: 'Sees a price, picks a time', body: 'A real range and your open slots on the same screen.' },
+      { title: 'Pays a deposit', body: 'Locks the spot and cuts no-shows.' },
+      { title: 'You get the booking', body: 'Details and photos land on your phone. Big jobs wait for your approval.' }
+    ];
+    const stepList = steps.map((x, i) => {
+      const active = i === s.step;
+      const done = i < s.step;
+      return {
+        n: done ? '✓' : String(i + 1),
+        title: x.title,
+        body: x.body,
+        rowBg: active ? '#2A2D31' : 'transparent',
+        dotBg: active || done ? '#4FD1B5' : '#3A3E43',
+        dotColor: active || done ? '#16181B' : '#F3F1EC'
+      };
+    });
+
+    return {
+      accent,
+      s0: s.step === 0, s1: s.step === 1, s2: s.step === 2, s3: s.step === 3, s4: s.step === 4, s5: s.step === 5,
+      waiting: s.step !== 5,
+      stepList,
+      stepLabel: s.step < 5 ? 'Step ' + (s.step + 1) + ' of 5' : 'Done',
+      progress: Math.min(100, ((s.step + 1) / 5) * 100) + '%',
+      stepTitle: titles[s.step],
+      vehicles: V.map((x) => ({ ...x, ...on(s.vehicle === x.id), pick: () => this.setState({ vehicle: x.id }) })),
+      packages: P.map((x) => ({ ...x, from: 'from ' + money(x.base), ...on(s.pkg === x.id), pick: () => this.setState({ pkg: x.id }) })),
+      conditions: C.map((x) => ({ ...x, ...on(s.cond === x.id), pick: () => this.setState({ cond: x.id }) })),
+      slots: T.map((x) => ({ label: x, ...on(s.slot === x), pick: () => this.setState({ slot: x }) })),
+      photoTiles: [0, 1, 2].map((i) => {
+        const filled = i < s.photos;
+        return { label: filled ? 'Added' : 'Add photo', bg: filled ? '#E7F1EE' : '#FFFFFF', border: filled ? accent : '#B9B5AE', color: filled ? accent : '#4A4F55' };
+      }),
+      addPhoto: () => this.setState({ photos: Math.min(3, s.photos + 1) }),
+      summaryLine: (v ? v.label : '') + ' · ' + (p ? p.label : '') + ' · ' + (c ? c.label : ''),
+      priceRange: money(low) + '–' + money(high),
+      priceHigh: money(high),
+      priceNote: needsApprove ? 'The detailer confirms the final price from your photos, usually within minutes. You can still hold a time now.' : 'Final price confirmed at the car. Any change needs your OK first.',
+      vehicleLabel: v ? v.label : '',
+      packageLabel: p ? p.label : '',
+      conditionLabel: c ? c.label : '',
+      slotLabel: s.slot || '',
+      deposit: money(deposit),
+      photoCountLabel: s.photos + (s.photos === 1 ? ' photo' : ' photos'),
+      needsApprove: s.step === 5 && needsApprove,
+      instant: s.step === 5 && !needsApprove,
+      detailerHeadline: needsApprove ? 'New booking: needs your price OK' : 'New booking',
+      waitingNote: s.step === 0 ? 'Nothing to do yet. The customer is picking options on their own.' : 'Still nothing to answer. The customer is on step ' + (s.step + 1) + ' by themselves.',
+      bookedLine: 'Booked for ' + (s.slot || '') + '. ' + money(deposit) + ' deposit paid.',
+      bookedNote: needsApprove ? "You'll get a text as soon as the detailer confirms your final price." : "You'll get a reminder text the day before.",
+      showNav: s.step < 5,
+      showBack: s.step > 0 && s.step < 5,
+      cantNext: !canNext,
+      nextOpacity: canNext ? 1 : 0.4,
+      nextLabel: nextLabels[s.step],
+      next: () => { if (canNext) this.setState({ step: Math.min(5, s.step + 1) }); },
+      back: () => this.setState({ step: Math.max(0, s.step - 1) }),
+      restart: () => this.setState({ step: 0, vehicle: null, pkg: null, cond: null, slot: null, photos: 0 })
+    };
+  }
+}
+</script>
+</body>
+</html>
