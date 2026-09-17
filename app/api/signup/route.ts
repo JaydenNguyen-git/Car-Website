@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   }
 
   const email = typeof body.email === "string" ? body.email.trim() : "";
-  const instagram = typeof body.instagram === "string" ? body.instagram.trim() : "";
+  const shopName = typeof body.shopName === "string" ? body.shopName.trim() : "";
   const honeypot = typeof body.company === "string" ? body.company.trim() : "";
 
   // Bots fill hidden fields. Pretend success without storing anything.
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   const record = {
     email,
-    instagram: instagram || null,
+    shopName: shopName || null,
     ...attribution,
     createdAt: new Date().toISOString(),
   };

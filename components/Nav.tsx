@@ -1,5 +1,3 @@
-import { SITE } from "@/lib/site-config";
-
 export default function Nav() {
   return (
     <div className="container" style={{ paddingTop: 24, paddingBottom: 24 }}>
@@ -15,24 +13,25 @@ export default function Nav() {
           style={{
             fontFamily: "var(--font-display), 'Arial Narrow', sans-serif",
             fontWeight: 700,
-            fontSize: 28,
+            fontSize: 26,
             letterSpacing: 0.5,
+            textTransform: "uppercase",
           }}
         >
-          {SITE.appName}
+          Instant Quote <span style={{ color: "var(--accent)" }}>+</span> Booking
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 32, fontSize: 16 }}>
-          <a href="#how" className="nav-link">
-            How it works
+          <a href="#demo" className="nav-link">
+            Demo
           </a>
-          <a href="#pricing" className="nav-link">
-            Pricing
+          <a href="#offer" className="nav-link">
+            Founding offer
           </a>
           <a href="#faq" className="nav-link">
             FAQ
           </a>
           <a href="#join" className="btn btn-accent" style={{ padding: "12px 20px" }}>
-            Get early access
+            Get it for your shop
           </a>
         </div>
       </nav>

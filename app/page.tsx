@@ -1,8 +1,9 @@
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
+import WhyNotSection from "@/components/WhyNotSection";
 import DemoSection from "@/components/DemoSection";
 import HowItWorks from "@/components/HowItWorks";
-import PricingSection from "@/components/PricingSection";
+import FoundingOfferSection from "@/components/FoundingOfferSection";
 import FAQSection from "@/components/FAQSection";
 import CTASection from "@/components/CTASection";
 
@@ -11,9 +12,10 @@ export default function Home() {
     <main>
       <Nav />
       <Hero />
+      <WhyNotSection />
       <DemoSection />
       <HowItWorks />
-      <PricingSection />
+      <FoundingOfferSection />
       <FAQSection />
       <CTASection />
     </main>

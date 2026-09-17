@@ -4,45 +4,33 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./Demo.module.css";
 import { SITE } from "@/lib/site-config";
 import { track } from "@/lib/analytics";
-import {
-  VEHICLES,
-  PACKAGES,
-  CONDITIONS,
-  TIME_SLOTS,
-  money,
-  computePriceRange,
-  needsApproval,
-  depositFor,
-} from "@/lib/pricing";
-
-const STEP_TITLES = [
-  "What are we detailing?",
-  "Pick a package",
-  "How does it look right now?",
-  "Your price and a time",
-  "Lock in your spot",
-  "You're booked",
-];
+import { SERVICES, VEHICLES, SAME_DAY_SLOTS, DROPOFF_SLOTS, money, computePriceRange } from "@/lib/services";
+import { SELECT_SERVICE_EVENT } from "./HeroServiceChips";
 
 const STEP_LIST = [
-  { title: "Taps your link", body: "From Instagram, Google, or your site. Picks their vehicle." },
-  { title: "Chooses a package", body: "Your packages, your prices, adjusted by vehicle size." },
-  { title: "Describes condition", body: "Quick condition pick plus photos, so the price holds up." },
-  { title: "Sees a price, picks a time", body: "A real range and your open slots on the same screen." },
-  { title: "Pays a deposit", body: "Locks the spot and cuts no-shows." },
+  { title: "Taps your link", body: "From Instagram, Google, or your site. Picks a service." },
+  { title: "Picks the vehicle", body: "Size adjusts the price automatically." },
+  { title: "Chooses a package", body: "Your packages and prices for that service." },
+  { title: "Picks film, finish, or condition", body: "Plus photos when the job needs them." },
+  { title: "Sees a price, picks a time", body: "A real range and your open slots, including drop-offs." },
+  { title: "Pays a deposit", body: "Set per service. Locks the spot and cuts no-shows." },
   { title: "You get the booking", body: "Details and photos land on your phone. Big jobs wait for your approval." },
 ];
 
+type Decision = "approve" | "adjust" | null;
+
 type State = {
   step: number;
+  service: string | null;
   vehicle: string | null;
   pkg: string | null;
-  cond: string | null;
+  opt: string | null;
   slot: string | null;
   photos: number;
+  decision: Decision;
 };
 
-const INITIAL_STATE: State = { step: 0, vehicle: null, pkg: null, cond: null, slot: null, photos: 0 };
+const INITIAL_STATE: State = { step: 0, service: null, vehicle: null, pkg: null, opt: null, slot: null, photos: 0, decision: null };
 
 function PhotoIcon() {
   return (
@@ -53,9 +41,9 @@ function PhotoIcon() {
   );
 }
 
-function CheckIcon() {
+function CheckIcon({ size = 28, color = "currentColor" }: { size?: number; color?: string }) {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
       <path d="M5 12.5l4.5 4.5L19 7.5" />
     </svg>
   );
@@ -73,35 +61,67 @@ function BellIcon() {
 export default function Demo() {
   const [s, setS] = useState<State>(INITIAL_STATE);
   const startedRef = useRef(false);
-  const detailerRef = useRef<HTMLDivElement>(null);
+  const shopRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get("service");
+    if (param && SERVICES.some((svc) => svc.id === param)) {
+      setS({ ...INITIAL_STATE, service: param, step: 1 });
+    }
+  }, []);
+
+  useEffect(() => {
+    function onSelect(e: Event) {
+      const id = (e as CustomEvent<string>).detail;
+      if (!SERVICES.some((svc) => svc.id === id)) return;
+      setS({ ...INITIAL_STATE, service: id, step: 1 });
+    }
+    window.addEventListener(SELECT_SERVICE_EVENT, onSelect);
+    return () => window.removeEventListener(SELECT_SERVICE_EVENT, onSelect);
+  }, []);
+
+  const service = SERVICES.find((x) => x.id === s.service);
   const vehicle = VEHICLES.find((x) => x.id === s.vehicle);
-  const pkg = PACKAGES.find((x) => x.id === s.pkg);
-  const cond = CONDITIONS.find((x) => x.id === s.cond);
-  const { low, high } = computePriceRange(vehicle, pkg, cond);
-  const approve = needsApproval(s.pkg, s.cond);
-  const deposit = depositFor(s.pkg);
+  const pkg = service?.packages.find((x) => x.id === s.pkg);
+  const opt = service?.options.find((x) => x.id === s.opt);
+  const { low, high } = computePriceRange(vehicle, pkg, opt);
+  const approve = service ? service.needsApproval(s.pkg, s.opt) : false;
+  const deposit = service?.deposit ?? 0;
+  const slots = service?.multiDay ? DROPOFF_SLOTS : SAME_DAY_SLOTS;
 
-  const canNext = [!!s.vehicle, !!s.pkg, !!s.cond, !!s.slot, true, true][s.step];
-  const nextLabels = ["Continue", "Continue", "See my price", "Continue to deposit", `Pay ${money(deposit)} deposit (demo)`, ""];
-  const showNav = s.step < 5;
-  const showBack = s.step > 0 && s.step < 5;
+  const canNext = [!!s.service, !!s.vehicle, !!s.pkg, !!s.opt, !!s.slot, true, true][s.step];
+  const nextLabels = ["Continue", "Continue", "Continue", "See my price", "Continue to deposit", `Pay ${money(deposit)} deposit (demo)`, ""];
+  const showNav = s.step < 6;
+  const showBack = s.step > 0 && s.step < 6;
+
+  const titles = [
+    "What do you need?",
+    "What's the vehicle?",
+    "Pick a package",
+    service?.optionTitle ?? "Pick an option",
+    "Your price and a time",
+    "Lock in your spot",
+    "You're booked",
+  ];
 
   useEffect(() => {
     if (s.step > 0 && !startedRef.current) {
       startedRef.current = true;
-      track("demo_start");
+      track("demo_start", { service: s.service ?? "" });
     }
-    if (s.step === 5) {
-      track("demo_complete", { needs_approval: approve });
-      detailerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (s.step === 6) {
+      track("demo_complete", { service: s.service ?? "", needs_approval: approve });
+      shopRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.step]);
 
+  function pickService(id: string) {
+    setS((prev) => ({ ...prev, service: id, pkg: null, opt: null, slot: null, photos: 0, decision: null }));
+  }
   function next() {
     if (!canNext) return;
-    setS((prev) => ({ ...prev, step: Math.min(5, prev.step + 1) }));
+    setS((prev) => ({ ...prev, step: Math.min(6, prev.step + 1) }));
   }
   function back() {
     setS((prev) => ({ ...prev, step: Math.max(0, prev.step - 1) }));
@@ -113,16 +133,33 @@ export default function Demo() {
   function addPhoto() {
     setS((prev) => ({ ...prev, photos: Math.min(3, prev.photos + 1) }));
   }
+  function decide(decision: "approve" | "adjust") {
+    setS((prev) => ({ ...prev, decision }));
+  }
 
-  const stepLabel = s.step < 5 ? `Step ${s.step + 1} of 5` : "Done";
-  const progress = Math.min(100, ((s.step + 1) / 5) * 100) + "%";
-  const mobileLine = s.step < 5 ? `Step ${s.step + 1} of 5: ${STEP_LIST[s.step].title}` : "Done: " + STEP_LIST[5].title;
+  const stepLabel = s.step < 6 ? `Step ${s.step + 1} of 6` : "Done";
+  const progress = Math.min(100, ((s.step + 1) / 6) * 100) + "%";
   const waitingNote = s.step === 0 ? "Nothing to do yet. The customer is picking options on their own." : `Still nothing to answer. The customer is on step ${s.step + 1} by themselves.`;
+  const photoCountLabel = s.photos + (s.photos === 1 ? " photo" : " photos");
+
+  const approvePending = s.step === 6 && approve && !s.decision;
+  const approveDone = s.step === 6 && approve && !!s.decision;
+  const approveDoneText =
+    s.decision === "adjust"
+      ? "Jordan gets a text to approve your updated price before the appointment."
+      : `Price confirmed at ${money(high)}. Jordan just got a text.`;
+  const bookedNote = !approve
+    ? "You'll get a reminder text the day before."
+    : s.decision === "approve"
+      ? `Update: the shop confirmed your price at ${money(high)}.`
+      : s.decision === "adjust"
+        ? "Update: the shop sent an updated price. You'll approve it before anything changes."
+        : "You'll get a text as soon as the shop confirms your final price.";
 
   return (
     <div className={styles.stage}>
       <div aria-live="polite" className="visually-hidden">
-        {STEP_TITLES[s.step]} — {stepLabel}
+        {titles[s.step]} — {stepLabel}
       </div>
 
       {/* Step list (desktop) */}
@@ -131,7 +168,8 @@ export default function Demo() {
           Try it like a customer
         </h2>
         <p className="body" style={{ margin: "0 0 20px", color: "var(--muted-on-dark)" }}>
-          Tap through the phone. The right side shows what lands on the detailer&apos;s phone.
+          This is what your customers would see from your link. Tap through it, then watch what
+          shows up on your phone.
         </p>
         {STEP_LIST.map((item, i) => {
           const active = i === s.step;
@@ -158,11 +196,6 @@ export default function Demo() {
         })}
       </div>
 
-      {/* Collapsed step line (mobile) */}
-      <div className={styles.stepsMobile}>
-        <span>{mobileLine}</span>
-      </div>
-
       {/* Customer phone */}
       <div className={styles.phoneCol}>
         <div className={styles.phoneLabel}>Customer&apos;s phone</div>
@@ -178,10 +211,41 @@ export default function Demo() {
               <div className={styles.progressFill} style={{ width: progress }} />
             </div>
             <h3 className="h3-card" style={{ marginTop: 4 }}>
-              {STEP_TITLES[s.step]}
+              {titles[s.step]}
             </h3>
 
             {s.step === 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {SERVICES.map((svc) => {
+                  const on = s.service === svc.id;
+                  return (
+                    <button
+                      key={svc.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => pickService(svc.id)}
+                      className={styles.optionBtn}
+                      style={{
+                        background: on ? "var(--accent-soft)" : "var(--surface)",
+                        border: `2px solid ${on ? "var(--accent)" : "var(--line)"}`,
+                        minHeight: 58,
+                        padding: "10px 16px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2,
+                      }}
+                    >
+                      <span style={{ fontSize: 16, fontWeight: 600 }}>{svc.label}</span>
+                      <span className="small" style={{ color: "var(--muted)" }}>
+                        {svc.sub}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {s.step === 1 && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {VEHICLES.map((v) => {
                   const on = s.vehicle === v.id;
@@ -201,9 +265,9 @@ export default function Demo() {
               </div>
             )}
 
-            {s.step === 1 && (
+            {s.step === 2 && service && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {PACKAGES.map((p) => {
+                {service.packages.map((p) => {
                   const on = s.pkg === p.id;
                   return (
                     <button
@@ -235,16 +299,16 @@ export default function Demo() {
               </div>
             )}
 
-            {s.step === 2 && (
+            {s.step === 3 && service && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {CONDITIONS.map((c) => {
-                  const on = s.cond === c.id;
+                {service.options.map((o) => {
+                  const on = s.opt === o.id;
                   return (
                     <button
-                      key={c.id}
+                      key={o.id}
                       type="button"
                       aria-pressed={on}
-                      onClick={() => setS((prev) => ({ ...prev, cond: c.id }))}
+                      onClick={() => setS((prev) => ({ ...prev, opt: o.id }))}
                       className={styles.optionBtn}
                       style={{
                         background: on ? "var(--accent-soft)" : "var(--surface)",
@@ -256,65 +320,69 @@ export default function Demo() {
                         gap: 2,
                       }}
                     >
-                      <span style={{ fontSize: 16, fontWeight: 600 }}>{c.label}</span>
+                      <span style={{ fontSize: 16, fontWeight: 600 }}>{o.label}</span>
                       <span className="small" style={{ color: "var(--muted)" }}>
-                        {c.sub}
+                        {o.sub}
                       </span>
                     </button>
                   );
                 })}
-                <div style={{ fontSize: 14, fontWeight: 600, paddingTop: 6 }}>Add photos (helps lock your price)</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
-                  {[0, 1, 2].map((i) => {
-                    const filled = i < s.photos;
-                    return (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={addPhoto}
-                        aria-label={filled ? `Photo ${i + 1} added` : "Add photo"}
-                        style={{
-                          height: 74,
-                          borderRadius: 12,
-                          border: `2px dashed ${filled ? "var(--accent)" : "#B9B5AE"}`,
-                          background: filled ? "var(--accent-soft)" : "var(--surface)",
-                          color: filled ? "var(--accent)" : "var(--muted)",
-                          fontSize: 13,
-                          fontWeight: 600,
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 4,
-                        }}
-                      >
-                        <PhotoIcon />
-                        <span>{filled ? "Added" : "Add photo"}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                {service.photos && (
+                  <>
+                    <div style={{ fontSize: 14, fontWeight: 600, paddingTop: 6 }}>{service.photoPrompt}</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+                      {[0, 1, 2].map((i) => {
+                        const filled = i < s.photos;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={addPhoto}
+                            aria-label={filled ? `Photo ${i + 1} added` : "Add photo"}
+                            style={{
+                              height: 74,
+                              borderRadius: 12,
+                              border: `2px dashed ${filled ? "var(--accent)" : "#B9B5AE"}`,
+                              background: filled ? "var(--accent-soft)" : "var(--surface)",
+                              color: filled ? "var(--accent)" : "var(--muted)",
+                              fontSize: 13,
+                              fontWeight: 600,
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 4,
+                            }}
+                          >
+                            <PhotoIcon />
+                            <span>{filled ? "Added" : "Add photo"}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
-            {s.step === 3 && (
+            {s.step === 4 && service && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ borderRadius: 16, background: "var(--ground)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
                   <div className="small" style={{ color: "var(--muted)" }}>
-                    {vehicle?.label} · {pkg?.label} · {cond?.label}
+                    {service.label} · {vehicle?.label} · {pkg?.label} · {opt?.label}
                   </div>
                   <div style={{ fontFamily: "var(--font-display), sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1 }}>
                     {money(low)}–{money(high)}
                   </div>
                   <div className="small" style={{ color: "var(--muted)" }}>
                     {approve
-                      ? "The detailer confirms the final price from your photos, usually within minutes. You can still hold a time now."
-                      : "Final price confirmed at the car. Any change needs your OK first."}
+                      ? "The shop confirms the final price from your details and photos, usually within minutes. You can still hold a spot now."
+                      : "Final price confirmed when you arrive. Any change needs your OK first."}
                   </div>
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 600, paddingTop: 2 }}>Pick a time</div>
+                <div style={{ fontSize: 14, fontWeight: 600, paddingTop: 2 }}>{service.multiDay ? "Pick a drop-off day" : "Pick a time"}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
-                  {TIME_SLOTS.map((t) => {
+                  {slots.map((t) => {
                     const on = s.slot === t;
                     return (
                       <button
@@ -340,9 +408,13 @@ export default function Demo() {
               </div>
             )}
 
-            {s.step === 4 && (
+            {s.step === 5 && service && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ borderRadius: 16, border: "1px solid var(--line)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8, fontSize: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ color: "var(--muted)" }}>Service</span>
+                    <span style={{ fontWeight: 600 }}>{service.label}</span>
+                  </div>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
                     <span style={{ color: "var(--muted)" }}>Vehicle</span>
                     <span style={{ fontWeight: 600 }}>{vehicle?.label}</span>
@@ -350,6 +422,10 @@ export default function Demo() {
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
                     <span style={{ color: "var(--muted)" }}>Package</span>
                     <span style={{ fontWeight: 600 }}>{pkg?.label}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ color: "var(--muted)" }}>{service.optionHeading}</span>
+                    <span style={{ fontWeight: 600 }}>{opt?.label}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
                     <span style={{ color: "var(--muted)" }}>Time</span>
@@ -368,22 +444,23 @@ export default function Demo() {
                   </div>
                 </div>
                 <div className="small" style={{ color: "var(--muted)" }}>
-                  Your deposit comes off the final bill. If the car&apos;s condition differs from your photos, you&apos;ll approve any price change before work starts. Free cancellation up to{" "}
-                  {SITE.cancellationWindowHours} hrs before.
+                  Your deposit comes off the final bill. If the vehicle differs from what you
+                  described, you&apos;ll approve any price change before work starts. Free
+                  cancellation up to {SITE.cancellationWindowHours} hours before.
                 </div>
               </div>
             )}
 
-            {s.step === 5 && (
+            {s.step === 6 && service && (
               <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-start" }}>
                 <div style={{ width: 56, height: 56, borderRadius: 28, background: "var(--accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <CheckIcon />
                 </div>
                 <div style={{ fontSize: 16, lineHeight: 1.5 }}>
-                  Booked for {s.slot}. {money(deposit)} deposit paid.
+                  Booked: {service.label.toLowerCase()}, {s.slot}. {money(deposit)} deposit paid.
                 </div>
                 <div className="small" style={{ color: "var(--muted)" }}>
-                  {approve ? "You'll get a text as soon as the detailer confirms your final price." : "You'll get a reminder text the day before."}
+                  {bookedNote}
                 </div>
                 <button
                   type="button"
@@ -431,11 +508,11 @@ export default function Demo() {
         </div>
       </div>
 
-      {/* Detailer phone */}
+      {/* Shop phone */}
       <div className={styles.phoneCol}>
-        <div className={styles.phoneLabel}>Detailer&apos;s phone</div>
-        <div className={styles.detailerFrame} ref={detailerRef}>
-          {s.step !== 5 && (
+        <div className={styles.phoneLabel}>Shop&apos;s phone</div>
+        <div className={styles.detailerFrame} ref={shopRef}>
+          {s.step !== 6 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "24px 8px", alignItems: "center", textAlign: "center" }}>
               <BellIcon />
               <div style={{ fontSize: 15, fontWeight: 600 }}>You&apos;re on a job</div>
@@ -444,7 +521,7 @@ export default function Demo() {
               </div>
             </div>
           )}
-          {s.step === 5 && (
+          {s.step === 6 && service && (
             <div className={styles.bookingCard} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 10, height: 10, borderRadius: 5, background: "var(--signal)" }} />
@@ -454,23 +531,48 @@ export default function Demo() {
                 <div style={{ fontWeight: 600, fontSize: 16 }}>
                   {SITE.customerName} · {s.slot}
                 </div>
+                <div style={{ fontWeight: 700 }}>{service.label}</div>
                 <div>
                   {vehicle?.label} · {pkg?.label}
                 </div>
                 <div>
-                  Condition: {cond?.label} · {s.photos} {s.photos === 1 ? "photo" : "photos"}
+                  {service.optionHeading}: {opt?.label}
+                  {service.photos ? ` · ${photoCountLabel}` : ""}
                 </div>
                 <div>
                   Estimate: {money(low)}–{money(high)}
                 </div>
                 <div style={{ fontWeight: 600, color: "var(--accent)" }}>{money(deposit)} deposit paid</div>
               </div>
-              {approve && (
+              {approvePending && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <div className="small" style={{ color: "var(--muted-on-dark)" }}>
-                    Big job. Check the photos and confirm the final price:
+                    Big job. Check the details and photos, then confirm the final price:
                   </div>
-                  <ApproveRow amount={money(high)} />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      type="button"
+                      onClick={() => decide("approve")}
+                      style={{ flexGrow: 1, minHeight: 46, borderRadius: 12, border: "none", background: "var(--signal)", color: "var(--ink)", fontSize: 14, fontWeight: 600 }}
+                    >
+                      Approve {money(high)}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => decide("adjust")}
+                      style={{ flexGrow: 1, minHeight: 46, borderRadius: 12, border: "2px solid var(--muted-on-dark)", background: "transparent", color: "var(--ground)", fontSize: 14, fontWeight: 600 }}
+                    >
+                      Adjust price
+                    </button>
+                  </div>
+                </div>
+              )}
+              {approveDone && (
+                <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: 12, borderRadius: 12, background: "#1F3A35" }}>
+                  <CheckIcon size={20} color="var(--signal)" />
+                  <div className="small" style={{ color: "var(--ground)" }}>
+                    {approveDoneText}
+                  </div>
                 </div>
               )}
               {!approve && (
@@ -482,30 +584,9 @@ export default function Demo() {
           )}
         </div>
         <div className="small" style={{ color: "var(--muted-on-dark)", maxWidth: 300, textAlign: "center" }}>
-          Demo pricing is an example. Detailers set their own packages and prices.
+          Prices here are examples. Your page uses your own services, packages, and prices.
         </div>
       </div>
-    </div>
-  );
-}
-
-function ApproveRow({ amount }: { amount: string }) {
-  const [approved, setApproved] = useState(false);
-  return (
-    <div style={{ display: "flex", gap: 8 }}>
-      <button
-        type="button"
-        onClick={() => setApproved(true)}
-        style={{ flexGrow: 1, minHeight: 46, borderRadius: 12, border: "none", background: "var(--signal)", color: "var(--ink)", fontSize: 14, fontWeight: 600 }}
-      >
-        {approved ? "Approved" : `Approve ${amount}`}
-      </button>
-      <button
-        type="button"
-        style={{ flexGrow: 1, minHeight: 46, borderRadius: 12, border: "2px solid var(--muted-on-dark)", background: "transparent", color: "var(--ground)", fontSize: 14, fontWeight: 600 }}
-      >
-        Adjust price
-      </button>
     </div>
   );
 }

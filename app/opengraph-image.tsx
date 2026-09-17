@@ -66,13 +66,13 @@ export default function OGImage() {
           </div>
           <div
             style={{
-              fontSize: 60,
+              fontSize: 56,
               fontWeight: 700,
               lineHeight: 1.02,
               textTransform: "uppercase",
             }}
           >
-            A price, a time, a deposit. While you&apos;re working.
+            Let customers price and book your work. Without calling you.
           </div>
           <div style={{ fontSize: 24, color: "#C9C6BF" }}>{SITE.description}</div>
         </div>

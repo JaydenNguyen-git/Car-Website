@@ -19,17 +19,17 @@ const body = IBM_Plex_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.siteUrl),
-  title: `${SITE.appName} | Instant quotes and bookings for detailers`,
+  title: `${SITE.appName} | ${SITE.title}`,
   description: SITE.description,
   openGraph: {
-    title: `${SITE.appName} | Instant quotes and bookings for detailers`,
+    title: `${SITE.appName} | ${SITE.title}`,
     description: SITE.description,
     type: "website",
     url: SITE.siteUrl,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE.appName} | Instant quotes and bookings for detailers`,
+    title: `${SITE.appName} | ${SITE.title}`,
     description: SITE.description,
   },
 };

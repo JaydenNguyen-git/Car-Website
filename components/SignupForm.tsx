@@ -18,8 +18,8 @@ export default function SignupForm() {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
+    const shopName = String(data.get("shop") || "");
     const email = String(data.get("email") || "");
-    const instagram = String(data.get("ig") || "");
     const company = String(data.get("company") || ""); // honeypot
 
     setStatus("loading");
@@ -29,7 +29,7 @@ export default function SignupForm() {
       const res = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, instagram, company, ...getAttribution() }),
+        body: JSON.stringify({ email, shopName, company, ...getAttribution() }),
       });
       const json = await res.json();
       if (!res.ok || !json.ok) {
@@ -55,16 +55,16 @@ export default function SignupForm() {
     <form onSubmit={onSubmit} noValidate>
       <div className="cta-form-row">
         <div className="cta-field">
+          <label htmlFor="shop" style={{ fontSize: 14, fontWeight: 600 }}>
+            Shop name
+          </label>
+          <input id="shop" name="shop" type="text" placeholder="Your shop" className="cta-input" style={{ width: 260 }} />
+        </div>
+        <div className="cta-field">
           <label htmlFor="email" style={{ fontSize: 14, fontWeight: 600 }}>
             Email
           </label>
-          <input id="email" name="email" type="email" required placeholder="you@yourdetailing.com" className="cta-input" />
-        </div>
-        <div className="cta-field">
-          <label htmlFor="ig" style={{ fontSize: 14, fontWeight: 600 }}>
-            Instagram handle
-          </label>
-          <input id="ig" name="ig" type="text" placeholder="@yourshop" className="cta-input" style={{ width: 240 }} />
+          <input id="email" name="email" type="email" required placeholder="you@yourshop.com" className="cta-input" />
         </div>
         {/* Honeypot — hidden from real visitors, catches simple bots */}
         <input
@@ -76,7 +76,7 @@ export default function SignupForm() {
           className="visually-hidden"
         />
         <button type="submit" disabled={status === "loading"} className="btn" style={{ height: 52, padding: "0 26px", background: "var(--ink)", color: "#fff" }}>
-          {status === "loading" ? "Submitting…" : "Get early access"}
+          {status === "loading" ? "Submitting…" : "Request a free setup"}
         </button>
       </div>
       {status === "error" && (

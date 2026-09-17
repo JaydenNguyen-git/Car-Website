@@ -10,11 +10,12 @@
   flex-wrap: wrap;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 720px) {
   .stage {
     flex-direction: column;
     align-items: center;
-    padding: 24px 16px;
+    padding: 28px 16px;
+    border-radius: 20px;
     gap: 24px;
   }
 }
@@ -27,29 +28,9 @@
   gap: 8px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 720px) {
   .stepsFull {
     display: none;
-  }
-}
-
-.stepsMobile {
-  display: none;
-  width: 100%;
-  max-width: 360px;
-}
-
-@media (max-width: 900px) {
-  .stepsMobile {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    background: var(--bezel);
-    font-size: 14px;
-    font-weight: 600;
   }
 }
 
@@ -88,8 +69,8 @@
 
 .customerFrame {
   width: min(360px, 100%);
-  aspect-ratio: 360 / 740;
-  min-height: 560px;
+  aspect-ratio: 360 / 780;
+  min-height: 600px;
   box-sizing: border-box;
   border-radius: 48px;
   background: var(--bezel);

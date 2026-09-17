@@ -1,30 +1,13 @@
-// Edit this file to update copy, prices, and placeholders across the whole site.
+// Edit this file to update copy and identity used across the site.
 
 export const SITE = {
-  appName: "[APP NAME]",
-  businessName: "[Your Detailing Co.]",
-  customerName: "[Customer name]",
-  foundingSpots: 10,
+  appName: "Instant Quote + Booking",
+  businessName: "Your Shop",
+  customerName: "Jordan M.",
   cancellationWindowHours: 24,
-  paymentProviderNote: "[Payment provider details]",
-  // Used for the favicon initial and OG image. Keep in sync with appName once it's real.
-  iconInitial: "D",
+  iconInitial: "I",
   siteUrl: "https://example.com",
+  title: "Instant quotes and bookings for tint, detailing, coating, PPF, and wrap shops",
   description:
     "Let customers get a price, book a time, and pay a deposit from your Instagram link.",
-};
-
-export const PLANS = {
-  starter: {
-    name: "Starter",
-    price: "[$XX]",
-    features:
-      "Quote and booking page, photo uploads, time slots, deposits, and instant lead alerts.",
-  },
-  pro: {
-    name: "Pro",
-    price: "[$XX]",
-    features:
-      "Everything in Starter, plus one-tap price approval for big jobs and automatic follow-up texts.",
-  },
 };
