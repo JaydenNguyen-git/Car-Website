@@ -4,6 +4,7 @@
 export type Vehicle = { id: string; label: string; multiplier: number };
 export type Package = { id: string; label: string; base: number; time: string };
 export type Option = { id: string; label: string; sub: string; mult: number };
+export type Upsell = { id: string; label: string; sub: string; price: number };
 
 export type Service = {
   id: string;
@@ -17,6 +18,7 @@ export type Service = {
   optionHeading: string;
   packages: Package[];
   options: Option[];
+  upsells: Upsell[];
   needsApproval: (pkgId: string | null, optId: string | null) => boolean;
 };
 
@@ -51,6 +53,11 @@ export const SERVICES: Service[] = [
       { id: "ceramic", label: "Ceramic", sub: "Much better heat rejection", mult: 1.35 },
       { id: "ir-ceramic", label: "IR ceramic", sub: "Best heat rejection", mult: 1.7 },
     ],
+    upsells: [
+      { id: "windshield-strip", label: "Windshield strip", sub: "Top strip for glare and sun visors", price: 40 },
+      { id: "door-jambs", label: "Door jamb tint", sub: "Matches tint when doors are open", price: 25 },
+      { id: "lights", label: "Headlight + taillight tint", sub: "Smoked film on light housings", price: 60 },
+    ],
     needsApproval: () => false,
   },
   {
@@ -72,6 +79,11 @@ export const SERVICES: Service[] = [
       { id: "light", label: "Light", sub: "Regular upkeep, no stains", mult: 1.0 },
       { id: "moderate", label: "Moderate", sub: "Some stains, crumbs, a little pet hair", mult: 1.15 },
       { id: "heavy", label: "Heavy", sub: "Lots of pet hair, spills, or odors", mult: 1.35 },
+    ],
+    upsells: [
+      { id: "pet-hair", label: "Pet hair removal", sub: "Deep extraction from seats and carpet", price: 40 },
+      { id: "headlights", label: "Headlight restoration", sub: "Clears cloudy, yellowed lenses", price: 50 },
+      { id: "odor", label: "Odor / ozone treatment", sub: "Neutralizes smoke and pet smells", price: 35 },
     ],
     needsApproval: (_pkg, opt) => opt === "heavy",
   },
@@ -95,6 +107,11 @@ export const SERVICES: Service[] = [
       { id: "light-swirls", label: "Light swirls", sub: "One-step polish before coating", mult: 1.25 },
       { id: "swirls-scratches", label: "Swirls and scratches", sub: "Multi-step paint correction", mult: 1.6 },
     ],
+    upsells: [
+      { id: "wheels", label: "Wheel coating", sub: "Protects wheels from brake dust", price: 150 },
+      { id: "glass", label: "Glass coating", sub: "Water sheets off windshield and windows", price: 80 },
+      { id: "interior-fabric", label: "Interior fabric protection", sub: "Repels spills on seats and carpet", price: 120 },
+    ],
     needsApproval: (_pkg, opt) => opt !== "new",
   },
   {
@@ -116,6 +133,11 @@ export const SERVICES: Service[] = [
     options: [
       { id: "gloss", label: "Gloss", sub: "Keeps the factory shine", mult: 1.0 },
       { id: "matte", label: "Matte (stealth)", sub: "Turns gloss paint satin", mult: 1.15 },
+    ],
+    upsells: [
+      { id: "headlight-film", label: "Headlight film", sub: "Protects lenses from rock chips", price: 150 },
+      { id: "door-edges", label: "Door edge guards", sub: "Covers the most chip-prone edges", price: 60 },
+      { id: "mirror-caps", label: "Mirror caps", sub: "Full coverage on side mirrors", price: 80 },
     ],
     needsApproval: (pkg) => pkg === "track" || pkg === "full-body",
   },
@@ -140,6 +162,11 @@ export const SERVICES: Service[] = [
       { id: "matte", label: "Matte", sub: "Flat, no shine", mult: 1.1 },
       { id: "color-shift", label: "Color-shift", sub: "Changes color by angle", mult: 1.4 },
     ],
+    upsells: [
+      { id: "door-handles", label: "Door handles", sub: "Wrapped to match or contrast", price: 50 },
+      { id: "calipers", label: "Caliper paint", sub: "Color-matched or contrast calipers", price: 120 },
+      { id: "roof-addon", label: "Roof wrap add-on", sub: "Bundle a roof wrap with this job", price: 300 },
+    ],
     needsApproval: (pkg) => pkg === "color-change",
   },
 ];
@@ -158,4 +185,9 @@ export function computePriceRange(vehicle: Vehicle | undefined, pkg: Package | u
   const low = roundPrice(pkg.base * vehicle.multiplier * opt.mult);
   const high = roundPrice(low * 1.2);
   return { low, high };
+}
+
+export function upsellTotal(service: Service | undefined, selectedIds: string[]): number {
+  if (!service) return 0;
+  return service.upsells.filter((u) => selectedIds.includes(u.id)).reduce((sum, u) => sum + u.price, 0);
 }

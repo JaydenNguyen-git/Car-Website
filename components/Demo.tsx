@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./Demo.module.css";
 import { SITE } from "@/lib/site-config";
 import { track } from "@/lib/analytics";
-import { SERVICES, VEHICLES, SAME_DAY_SLOTS, DROPOFF_SLOTS, money, computePriceRange } from "@/lib/services";
+import { SERVICES, VEHICLES, SAME_DAY_SLOTS, DROPOFF_SLOTS, money, computePriceRange, upsellTotal } from "@/lib/services";
 import { SELECT_SERVICE_EVENT } from "./HeroServiceChips";
 
 const STEP_LIST = [
@@ -12,10 +12,13 @@ const STEP_LIST = [
   { title: "Picks the vehicle", body: "Size adjusts the price automatically." },
   { title: "Chooses a package", body: "Your packages and prices for that service." },
   { title: "Picks film, finish, or condition", body: "Plus photos when the job needs them." },
+  { title: "Adds any extras", body: "Optional add-ons, priced and picked from a list you set." },
   { title: "Sees a price, picks a time", body: "A real range and your open slots, including drop-offs." },
   { title: "Pays a deposit", body: "Set per service. Locks the spot and cuts no-shows." },
   { title: "You get the booking", body: "Details and photos land on your phone. Big jobs wait for your approval." },
 ];
+
+const LAST_STEP = STEP_LIST.length - 1; // 7
 
 type Decision = "approve" | "adjust" | null;
 
@@ -25,12 +28,13 @@ type State = {
   vehicle: string | null;
   pkg: string | null;
   opt: string | null;
+  upsells: string[];
   slot: string | null;
   photos: number;
   decision: Decision;
 };
 
-const INITIAL_STATE: State = { step: 0, service: null, vehicle: null, pkg: null, opt: null, slot: null, photos: 0, decision: null };
+const INITIAL_STATE: State = { step: 0, service: null, vehicle: null, pkg: null, opt: null, upsells: [], slot: null, photos: 0, decision: null };
 
 function PhotoIcon() {
   return (
@@ -85,20 +89,25 @@ export default function Demo() {
   const pkg = service?.packages.find((x) => x.id === s.pkg);
   const opt = service?.options.find((x) => x.id === s.opt);
   const { low, high } = computePriceRange(vehicle, pkg, opt);
+  const upTotal = upsellTotal(service, s.upsells);
+  const displayLow = low + upTotal;
+  const displayHigh = high + upTotal;
+  const selectedUpsells = service ? service.upsells.filter((u) => s.upsells.includes(u.id)) : [];
   const approve = service ? service.needsApproval(s.pkg, s.opt) : false;
   const deposit = service?.deposit ?? 0;
   const slots = service?.multiDay ? DROPOFF_SLOTS : SAME_DAY_SLOTS;
 
-  const canNext = [!!s.service, !!s.vehicle, !!s.pkg, !!s.opt, !!s.slot, true, true][s.step];
-  const nextLabels = ["Continue", "Continue", "Continue", "See my price", "Continue to deposit", `Pay ${money(deposit)} deposit (demo)`, ""];
-  const showNav = s.step < 6;
-  const showBack = s.step > 0 && s.step < 6;
+  const canNext = [!!s.service, !!s.vehicle, !!s.pkg, !!s.opt, true, !!s.slot, true, true][s.step];
+  const nextLabels = ["Continue", "Continue", "Continue", "Continue", "See my price", "Continue to deposit", `Pay ${money(deposit)} deposit (demo)`, ""];
+  const showNav = s.step < LAST_STEP;
+  const showBack = s.step > 0 && s.step < LAST_STEP;
 
   const titles = [
     "What do you need?",
     "What's the vehicle?",
     "Pick a package",
     service?.optionTitle ?? "Pick an option",
+    "Want to add anything?",
     "Your price and a time",
     "Lock in your spot",
     "You're booked",
@@ -109,7 +118,7 @@ export default function Demo() {
       startedRef.current = true;
       track("demo_start", { service: s.service ?? "" });
     }
-    if (s.step === 6) {
+    if (s.step === LAST_STEP) {
       track("demo_complete", { service: s.service ?? "", needs_approval: approve });
       shopRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
@@ -117,11 +126,11 @@ export default function Demo() {
   }, [s.step]);
 
   function pickService(id: string) {
-    setS((prev) => ({ ...prev, service: id, pkg: null, opt: null, slot: null, photos: 0, decision: null }));
+    setS((prev) => ({ ...prev, service: id, pkg: null, opt: null, upsells: [], slot: null, photos: 0, decision: null }));
   }
   function next() {
     if (!canNext) return;
-    setS((prev) => ({ ...prev, step: Math.min(6, prev.step + 1) }));
+    setS((prev) => ({ ...prev, step: Math.min(LAST_STEP, prev.step + 1) }));
   }
   function back() {
     setS((prev) => ({ ...prev, step: Math.max(0, prev.step - 1) }));
@@ -133,25 +142,31 @@ export default function Demo() {
   function addPhoto() {
     setS((prev) => ({ ...prev, photos: Math.min(3, prev.photos + 1) }));
   }
+  function toggleUpsell(id: string) {
+    setS((prev) => ({
+      ...prev,
+      upsells: prev.upsells.includes(id) ? prev.upsells.filter((x) => x !== id) : [...prev.upsells, id],
+    }));
+  }
   function decide(decision: "approve" | "adjust") {
     setS((prev) => ({ ...prev, decision }));
   }
 
-  const stepLabel = s.step < 6 ? `Step ${s.step + 1} of 6` : "Done";
-  const progress = Math.min(100, ((s.step + 1) / 6) * 100) + "%";
+  const stepLabel = s.step < LAST_STEP ? `Step ${s.step + 1} of ${LAST_STEP}` : "Done";
+  const progress = Math.min(100, ((s.step + 1) / LAST_STEP) * 100) + "%";
   const waitingNote = s.step === 0 ? "Nothing to do yet. The customer is picking options on their own." : `Still nothing to answer. The customer is on step ${s.step + 1} by themselves.`;
   const photoCountLabel = s.photos + (s.photos === 1 ? " photo" : " photos");
 
-  const approvePending = s.step === 6 && approve && !s.decision;
-  const approveDone = s.step === 6 && approve && !!s.decision;
+  const approvePending = s.step === LAST_STEP && approve && !s.decision;
+  const approveDone = s.step === LAST_STEP && approve && !!s.decision;
   const approveDoneText =
     s.decision === "adjust"
       ? "Jordan gets a text to approve your updated price before the appointment."
-      : `Price confirmed at ${money(high)}. Jordan just got a text.`;
+      : `Price confirmed at ${money(displayHigh)}. Jordan just got a text.`;
   const bookedNote = !approve
     ? "You'll get a reminder text the day before."
     : s.decision === "approve"
-      ? `Update: the shop confirmed your price at ${money(high)}.`
+      ? `Update: the shop confirmed your price at ${money(displayHigh)}.`
       : s.decision === "adjust"
         ? "Update: the shop sent an updated price. You'll approve it before anything changes."
         : "You'll get a text as soon as the shop confirms your final price.";
@@ -367,12 +382,68 @@ export default function Demo() {
 
             {s.step === 4 && service && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div className="small" style={{ color: "var(--muted)", marginTop: -6 }}>
+                  Optional — add as many as you&apos;d like.
+                </div>
+                {service.upsells.map((u) => {
+                  const on = s.upsells.includes(u.id);
+                  return (
+                    <button
+                      key={u.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => toggleUpsell(u.id)}
+                      style={{
+                        textAlign: "left",
+                        padding: "12px 16px",
+                        minHeight: 64,
+                        borderRadius: 14,
+                        background: on ? "var(--accent-soft)" : "var(--surface)",
+                        border: `2px solid ${on ? "var(--accent)" : "var(--line)"}`,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        width: "100%",
+                      }}
+                    >
+                      <span
+                        style={{
+                          flex: "0 0 22px",
+                          width: 22,
+                          height: 22,
+                          borderRadius: 6,
+                          border: `2px solid ${on ? "var(--accent)" : "var(--line)"}`,
+                          background: on ? "var(--accent)" : "transparent",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        aria-hidden="true"
+                      >
+                        {on && <CheckIcon size={14} color="#fff" />}
+                      </span>
+                      <span style={{ display: "flex", flexDirection: "column", gap: 2, flexGrow: 1 }}>
+                        <span style={{ fontSize: 16, fontWeight: 600 }}>{u.label}</span>
+                        <span className="small" style={{ color: "var(--muted)" }}>
+                          {u.sub}
+                        </span>
+                      </span>
+                      <span style={{ fontSize: 14, fontWeight: 600, flexShrink: 0 }}>+{money(u.price)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {s.step === 5 && service && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ borderRadius: 16, background: "var(--ground)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
                   <div className="small" style={{ color: "var(--muted)" }}>
                     {service.label} · {vehicle?.label} · {pkg?.label} · {opt?.label}
+                    {selectedUpsells.length > 0 ? ` · +${selectedUpsells.length} extra${selectedUpsells.length > 1 ? "s" : ""}` : ""}
                   </div>
                   <div style={{ fontFamily: "var(--font-display), sans-serif", fontSize: 44, fontWeight: 700, lineHeight: 1 }}>
-                    {money(low)}–{money(high)}
+                    {money(displayLow)}–{money(displayHigh)}
                   </div>
                   <div className="small" style={{ color: "var(--muted)" }}>
                     {approve
@@ -408,7 +479,7 @@ export default function Demo() {
               </div>
             )}
 
-            {s.step === 5 && service && (
+            {s.step === 6 && service && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ borderRadius: 16, border: "1px solid var(--line)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8, fontSize: 14 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
@@ -427,6 +498,12 @@ export default function Demo() {
                     <span style={{ color: "var(--muted)" }}>{service.optionHeading}</span>
                     <span style={{ fontWeight: 600 }}>{opt?.label}</span>
                   </div>
+                  {selectedUpsells.map((u) => (
+                    <div key={u.id} style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span style={{ color: "var(--muted)" }}>{u.label}</span>
+                      <span style={{ fontWeight: 600 }}>{money(u.price)}</span>
+                    </div>
+                  ))}
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
                     <span style={{ color: "var(--muted)" }}>Time</span>
                     <span style={{ fontWeight: 600 }}>{s.slot}</span>
@@ -434,7 +511,7 @@ export default function Demo() {
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
                     <span style={{ color: "var(--muted)" }}>Estimate</span>
                     <span style={{ fontWeight: 600 }}>
-                      {money(low)}–{money(high)}
+                      {money(displayLow)}–{money(displayHigh)}
                     </span>
                   </div>
                   <div style={{ height: 1, background: "var(--line-soft)" }} />
@@ -451,7 +528,7 @@ export default function Demo() {
               </div>
             )}
 
-            {s.step === 6 && service && (
+            {s.step === 7 && service && (
               <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-start" }}>
                 <div style={{ width: 56, height: 56, borderRadius: 28, background: "var(--accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <CheckIcon />
@@ -512,7 +589,7 @@ export default function Demo() {
       <div className={`${styles.phoneCol} ${styles.shopCol}`}>
         <div className={styles.phoneLabel}>Shop&apos;s phone</div>
         <div className={styles.detailerFrame} ref={shopRef}>
-          {s.step !== 6 && (
+          {s.step !== LAST_STEP && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "24px 8px", alignItems: "center", textAlign: "center" }}>
               <BellIcon />
               <div style={{ fontSize: 15, fontWeight: 600 }}>You&apos;re on a job</div>
@@ -521,7 +598,7 @@ export default function Demo() {
               </div>
             </div>
           )}
-          {s.step === 6 && service && (
+          {s.step === LAST_STEP && service && (
             <div className={styles.bookingCard} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 10, height: 10, borderRadius: 5, background: "var(--signal)" }} />
@@ -539,8 +616,9 @@ export default function Demo() {
                   {service.optionHeading}: {opt?.label}
                   {service.photos ? ` · ${photoCountLabel}` : ""}
                 </div>
+                {selectedUpsells.length > 0 && <div>Extras: {selectedUpsells.map((u) => u.label).join(", ")}</div>}
                 <div>
-                  Estimate: {money(low)}–{money(high)}
+                  Estimate: {money(displayLow)}–{money(displayHigh)}
                 </div>
                 <div style={{ fontWeight: 600, color: "var(--accent)" }}>{money(deposit)} deposit paid</div>
               </div>
@@ -555,7 +633,7 @@ export default function Demo() {
                       onClick={() => decide("approve")}
                       style={{ flexGrow: 1, minHeight: 46, borderRadius: 12, border: "none", background: "var(--signal)", color: "var(--ink)", fontSize: 14, fontWeight: 600 }}
                     >
-                      Approve {money(high)}
+                      Approve {money(displayHigh)}
                     </button>
                     <button
                       type="button"
