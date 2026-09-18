@@ -7,6 +7,8 @@
 // resolves to null so callers fall back to the generic copy instead of
 // rendering something like "Quote your work, undefined."
 
+import { SHOP_NAME_OVERRIDES } from "@/lib/shop-overrides";
+
 const MAX_LEN = 60;
 
 // Filenames/paths a browser or crawler might request that would otherwise
@@ -26,6 +28,7 @@ export function shopNameFromSlug(slug: string | string[] | undefined | null): st
 
   const rawLower = decoded.trim().toLowerCase();
   if (!rawLower || RESERVED_RAW.has(rawLower)) return null;
+  if (rawLower in SHOP_NAME_OVERRIDES) return SHOP_NAME_OVERRIDES[rawLower];
 
   const spaced = decoded.replace(/[-_]+/g, " ");
   const cleaned = spaced

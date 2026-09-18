@@ -7,7 +7,7 @@ type SearchParams = Record<string, string | string[] | undefined>;
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
   const sp = await searchParams;
   const serviceId = typeof sp.service === "string" ? sp.service : undefined;
-  return buildMetadata(null, serviceId);
+  return buildMetadata(null, null, serviceId, "/");
 }
 
 export default function Home() {

@@ -17,7 +17,10 @@ export async function generateMetadata({
   const sp = await searchParams;
   const shopName = shopNameFromSlug(shop);
   const serviceId = typeof sp.service === "string" ? sp.service : undefined;
-  return buildMetadata(shopName, serviceId);
+  // An invalid/garbled slug renders the same generic content as "/", so it
+  // should canonicalize there too rather than to a nonsense URL of itself.
+  const path = shopName ? `/${encodeURIComponent(shop)}` : "/";
+  return buildMetadata(shopName, shopName ? shop : null, serviceId, path);
 }
 
 export default async function ShopLandingPage({ params }: { params: Promise<Params> }) {
