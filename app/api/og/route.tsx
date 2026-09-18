@@ -1,8 +1,10 @@
 import { ImageResponse } from "next/og";
+import { NextRequest } from "next/server";
 import { SITE } from "@/lib/site-config";
+import { SERVICES } from "@/lib/services";
+import { shopNameFromSlug } from "@/lib/personalize";
 
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+const size = { width: 1200, height: 630 };
 
 function Phone({ dark = false }: { dark?: boolean }) {
   return (
@@ -37,7 +39,19 @@ function Phone({ dark = false }: { dark?: boolean }) {
   );
 }
 
-export default function OGImage() {
+export async function GET(req: NextRequest) {
+  // Reuse the same cleaner the slug route uses, so this route is safe even
+  // when someone hits it directly with an arbitrary query string.
+  const shop = shopNameFromSlug(req.nextUrl.searchParams.get("shop"));
+  const serviceId = req.nextUrl.searchParams.get("service");
+  const service = SERVICES.find((x) => x.id === serviceId);
+
+  const eyebrow = service ? `${service.label} · quotes & booking` : SITE.appName;
+  const headline = shop ? `${shop}'s new booking page is ready.` : "Let customers price and book your work. Without calling you.";
+  const description = shop
+    ? "Get an instant price, pick a time, and book — no calls needed."
+    : SITE.description;
+
   return new ImageResponse(
     (
       <div
@@ -62,19 +76,19 @@ export default function OGImage() {
               color: "#4FD1B5",
             }}
           >
-            {SITE.appName}
+            {eyebrow}
           </div>
           <div
             style={{
-              fontSize: 56,
+              fontSize: shop ? 50 : 56,
               fontWeight: 700,
-              lineHeight: 1.02,
-              textTransform: "uppercase",
+              lineHeight: 1.05,
+              textTransform: shop ? "none" : "uppercase",
             }}
           >
-            Let customers price and book your work. Without calling you.
+            {headline}
           </div>
-          <div style={{ fontSize: 24, color: "#C9C6BF" }}>{SITE.description}</div>
+          <div style={{ fontSize: 24, color: "#C9C6BF" }}>{description}</div>
         </div>
         <div style={{ display: "flex", gap: 20 }}>
           <Phone />

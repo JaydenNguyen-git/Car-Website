@@ -3,12 +3,15 @@
 import { FormEvent, useEffect, useState } from "react";
 import { track } from "@/lib/analytics";
 import { captureAttribution, getAttribution } from "@/lib/attribution";
+import { useShopName } from "./ShopNameProvider";
 
 type Status = "idle" | "loading" | "done" | "error";
 
 export default function SignupForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const shopName = useShopName();
+  const [shopField, setShopField] = useState(shopName ?? "");
 
   useEffect(() => {
     captureAttribution();
@@ -58,7 +61,16 @@ export default function SignupForm() {
           <label htmlFor="shop" style={{ fontSize: 14, fontWeight: 600 }}>
             Shop name
           </label>
-          <input id="shop" name="shop" type="text" placeholder="Your shop" className="cta-input" style={{ width: 260 }} />
+          <input
+            id="shop"
+            name="shop"
+            type="text"
+            placeholder="Your shop"
+            className="cta-input"
+            style={{ width: 260 }}
+            value={shopField}
+            onChange={(e) => setShopField(e.target.value)}
+          />
         </div>
         <div className="cta-field">
           <label htmlFor="email" style={{ fontSize: 14, fontWeight: 600 }}>

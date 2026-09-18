@@ -5,6 +5,7 @@ import styles from "./Demo.module.css";
 import { SITE } from "@/lib/site-config";
 import { track } from "@/lib/analytics";
 import { SERVICES, VEHICLES, SAME_DAY_SLOTS, DROPOFF_SLOTS, money, computePriceRange, upsellTotal } from "@/lib/services";
+import { useShopName } from "./ShopNameProvider";
 import { SELECT_SERVICE_EVENT } from "./HeroServiceChips";
 
 const STEP_LIST = [
@@ -64,6 +65,7 @@ function BellIcon() {
 
 export default function Demo() {
   const [s, setS] = useState<State>(INITIAL_STATE);
+  const shopName = useShopName();
   const startedRef = useRef(false);
   const shopRef = useRef<HTMLDivElement>(null);
 
@@ -217,7 +219,7 @@ export default function Demo() {
         <div className={styles.customerFrame}>
           <div className={styles.customerScreen}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontWeight: 600, fontSize: 15 }}>{SITE.businessName}</div>
+              <div style={{ fontWeight: 600, fontSize: 15 }}>{shopName ?? SITE.businessName}</div>
               <div className="small" style={{ color: "var(--muted)" }}>
                 {stepLabel}
               </div>
